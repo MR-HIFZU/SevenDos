@@ -14,6 +14,7 @@ import sys
 import os
 import struct
 
+
 # Colors
 G = '\033[92m'  # Green
 Y = '\033[93m'  # Yellow
